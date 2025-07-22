@@ -1,2 +1,2 @@
-# piano-allwinner-113
-This piano a college project for Embedded Systems and Electronics Systems Design. The piano uses the lcpi-pc-t113 dev board, with the Allwinner T113s chip, debian embedded. The project includes the design of the PCB and the design of the box. The project includes notes on the process 
+# Piano with Allwinner T113 and Dev Board LCPI-PC
+This piano is a college project for Embedded Systems and Electronic Systems Design. It uses the LCPI-PC-T113 development board with the Allwinner T113s chip running embedded Debian. The project includes the design of the PCB as well as the design of the enclosure. Notes on the development process are also included.
