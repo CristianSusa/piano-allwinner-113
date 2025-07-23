@@ -3,8 +3,8 @@ This piano is a college project for Embedded Systems and Electronic Systems Desi
 
 ## Contents
 Within this repository, you will find two folders:
-* Embedded Systems Development
-* Electronic System Design
+* embedded-systems-development
+* electronic-system-design
 
 These folders serve as a step-by-step guide on how to construct the piano. They include files, construction notes, and suggestions for improvements in future versions.
 
