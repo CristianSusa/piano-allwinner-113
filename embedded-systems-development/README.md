@@ -5,6 +5,22 @@ We chose the LCPI-PC-F133-T113-D1S-V1.3 development board, available at AliExpre
 
 This board features a dual-core ARM Cortex-A7 CPU, powered by the Allwinner T113-S3 SOC.
 
+1. [Buildroot](#buildroot)
+    1. [Clone the repository](#1-clone-the-repository)
+    2. [Kernel configuration](#2-kernel-configuration)
+    3. [Toolchain](#3-toolchain)
+    4. [U-boot setup](#4-u-boot-setup)
+    5. [Creating the SD](#5-creating-the-sd)
+    6. [Creating image](#6-creating-image)
+    7. [Debian](#7-debian)
+    8. [Enjoy](#8-enjoy)
+2. [Pins and Peripherals](#pins-and-peripherals)
+3. [Device Tree](#device-tree)
+    1. [The .dtsi File](#the-dtsi-file)
+    2. [The .dts File](#the-dts-file)
+4. [Rebuilding](#rebuilding)
+
+
 ## Buildroot
 Buildroot is a tool that helps in the construction of embedded systems, similar to Yocto, OpenWRT, and other build systems. We are using Buildroot to create the system image. Below is the step-by-step guide.
 
@@ -122,7 +138,7 @@ At the end, you will have a file named `u-boot-sun8iw20p1.bin`. Please copy this
 Finally, we are going to create the partitions and add the necessary files to our SD card to make everything work.
 
 According to the image:
-![buildroot_table](/Images/buildroot_table.png)
+![buildroot_table](/embedded-systems-development/Images/buildroot_table.png)
 
 * `boot_package.fex` includes `u-boot-sun8iw20p1.bin` and `sun8i-mangopi-mq-dual-linux.dtb`. These are essential for the initial boot stage of the system.
 * `boot.vfat` includes `boot.img`, `zImage`, and `sun8i-mangopi-mq-dual-linux.dtb`. These files contain the kernel, device tree, and bootloader required to start the operating system.
@@ -211,19 +227,19 @@ The screen, initially proposed to be SPI, was changed to I2C with bit-banging, a
 Those are the pins used for this project. Below, you will find some images for further reference.
 
 ### Keys Matrix
-![keys_matrix](/Images/keys_matrix.png)
-![keys_shifts](/Images/keys_shifts.png)
+![keys_matrix](/embedded-systems-development/Images/keys_matrix.png)
+![keys_shifts](/embedded-systems-development/Images/keys_shifts.png)
 
 ### LEDs Matrix
-![leds_matrix](/Images/leds_matrix.png)
-![leds_shifts](/Images/leds_shifts.png)
+![leds_matrix](/embedded-systems-development/Images/leds_matrix.png)
+![leds_shifts](/embedded-systems-development/Images/leds_shifts.png)
 
 ### Screen and Buttons
-![screen_menu](/Images/screen_menu.png)
-![buttons_menu](/Images/buttons_menu.png)
+![screen_menu](/embedded-systems-development/Images/screen_menu.png)
+![buttons_menu](/embedded-systems-development/Images/buttons_menu.png)
 
 ### Dev Board Pinout
-![dev_board_pinout](/Images/dev_board_pinout.png)
+![dev_board_pinout](/embedded-systems-development/Images/dev_board_pinout.png)
 
 ## Device Tree
 This is how we set up the pins to interact with our kernel and the OS. Here, we define what each pin is used for and which drivers they should include. This is essential when customizing an image to ensure the pins are used correctly.
@@ -233,60 +249,134 @@ Keeping the pinout in mind, we configure the pins connected to a shift register 
 ### The .dtsi File
 This is a general configuration. Here, we define the pins for the matrices, screen, buttons, and UART. You can see that all of them have `status = "disabled";`. This is for convention; they will be enabled in the next important file, the `.dts`.
 
+You can find this file in `your-path/Buildroot-YuzukiSBC/buildroot/board/allwinner-generic/sun8i-t113/dts/linux/sun8iw20p1-linux.dtsi`
+
 These are the nodes:
 
 #### UART
 For serial communication.
 ```
-uart0: uart@2500000 {
-    compatible = "allwinner,sun8i-uart";
-    device_type = "uart0";
-    reg = <0x0 0x02500000 0x0 0x400>;
-    interrupts = <GIC_SPI 2 IRQ_TYPE_LEVEL_HIGH>;
-    sunxi,uart-fifosize = <64>;
-    clocks = <&ccu CLK_BUS_UART0>;
-    clock-names = "uart0";
-    resets = <&ccu RST_BUS_UART0>;
-    uart0_port = <0>;
-    uart0_type = <2>;
-    status = "disabled";
-};
+/ {
+    soc: soc@3000000 {
+        uart0: uart@2500000 {
+            compatible = "allwinner,sun8i-uart";
+            device_type = "uart0";
+            reg = <0x0 0x02500000 0x0 0x400>;
+            interrupts = <GIC_SPI 2 IRQ_TYPE_LEVEL_HIGH>;
+            sunxi,uart-fifosize = <64>;
+            clocks = <&ccu CLK_BUS_UART0>;
+            clock-names = "uart0";
+            resets = <&ccu RST_BUS_UART0>;
+            uart0_port = <0>;
+            uart0_type = <2>;
+            status = "disabled";
+        };
+    }
+}
 ```
 
 #### Keys Matrix, LEDs Matrix, and Buttons
 Here, we set the pins to `gpio_in`, making each pin a GPIO port that we can configure via software to send or receive data.
 ```
-gpio_piano_pins: gpio_piano_pins@0 {
-    pins = "PE0", "PE1", "PE4", "PE5", "PE6", "PB7",
-        "PG0", "PG1", "PG2", "PG3", "PG4", "PG5",
-        "PB4", "PB5", "PB6";
-    function = "gpio_in";
-    drive-strength = <10>;
-    bias-disable;
-};
+/ {
+    soc: soc@3000000 {
+        pio: pinctrl@2000000 {
+            gpio_piano_pins: gpio_piano_pins@0 {
+                pins = "PE0", "PE1", "PE4", "PE5", "PE6", "PB7",
+                    "PG0", "PG1", "PG2", "PG3", "PG4", "PG5",
+                    "PB4", "PB5", "PB6";
+                function = "gpio_in";
+                drive-strength = <10>;
+                bias-disable;
+            };
+        }
+    }
+}
 ```
 
 #### I2C Screen
 We define the clock and data pins for the screen. Additionally, we configure some settings of our OLED display, such as width, height, and the driver `ssd1306fb-i2c`. This driver was included in the kernel configuration.
 ```
-i2c_gpio: i2c-gpio {
-    compatible = "i2c-gpio";
-    gpios = <&pio 4 10 GPIO_ACTIVE_HIGH /* SDA = PE10 */
-                &pio 4 11 GPIO_ACTIVE_HIGH>; /* SCL = PE11 */
-    i2c-gpio,delay-us = <5>;
-    #address-cells = <1>;
-    #size-cells = <0>;
-    status = "disabled";
+/ {
+    i2c_gpio: i2c-gpio {
+        compatible = "i2c-gpio";
+        gpios = <&pio 4 10 GPIO_ACTIVE_HIGH /* SDA = PE10 */
+                    &pio 4 11 GPIO_ACTIVE_HIGH>; /* SCL = PE11 */
+        i2c-gpio,delay-us = <5>;
+        #address-cells = <1>;
+        #size-cells = <0>;
+        status = "disabled";
 
-        oled_display: oled@3c {
-            compatible = "solomon,ssd1306fb-i2c";
-            reg = <0x3c>;
-            solomon,width = <128>;
-            solomon,height = <64>;
-            solomon,page-offset = <0>;
-			solomon,com-offset = <0>;
-            solomon,segment-offset = <0>;
-            status = "okay";
-        };
+            oled_display: oled@3c {
+                compatible = "solomon,ssd1306fb-i2c";
+                reg = <0x3c>;
+                solomon,width = <128>;
+                solomon,height = <64>;
+                solomon,page-offset = <0>;
+                solomon,com-offset = <0>;
+                solomon,segment-offset = <0>;
+                status = "okay";
+            };
+    };
+}
+```
+
+### The .dts File
+This is a more specific file with the header `#include "sun8iw20p1-linux.dtsi"`, meaning that includes our previous nodes configuration. Here we enable our devices along with the pins.
+
+You can find this file in `your-path/Buildroot-YuzukiSBC/buildroot/board/mangopi/mq-dual/dts/linux/sun8i-mangopi-mq-dual-linux.dts`
+
+#### UART
+```
+&uart0 {
+	pinctrl-names = "default", "sleep";
+	pinctrl-0 = <&uart0_pins_a>;
+	pinctrl-1 = <&uart0_pins_b>;
+	status = "okay";
 };
+```
+
+#### Keys Matrix, LEDs Matrix, and Buttons
+```
+&pio {
+    gpio_piano_pins: gpio_piano_pins@0 {
+        allwinner,pins = "PE0", "PE1", "PE4", "PE5", "PE6", "PB7",
+                "PG0", "PG1", "PG2", "PG3", "PG4", "PG5",
+                "PB4", "PB5", "PB6";
+        allwinner,function = "gpio_in";
+        allwinner,muxsel = <0>;
+        allwinner,drive = <1>;
+        allwinner,pull = <0>;
+    };
+}
+```
+
+#### I2C Screen
+```
+&i2c_gpio {
+    status = "okay";
+};
+```
+
+## Rebuilding 
+After making any changes within your device tree, you should:
+
+1. Rebuild your image
+2. Copy `boot_package.fex` to the appropriate location
+3. Copy `boot.img` and `sun8i-mangopi-mq-dual-linux.dtb` to the appropriate location
+
+```
+## 1.
+make -j10 linux-rebuild
+make -j10
+
+## 2.
+cd your-path/Buildroot-YuzukiSBC/buildroot/output/images
+./dragonsecboot -pack boot_package.cfg
+sudo dd if=boot_package.fex of=/dev/sdX(CHANGE) bs=1k seek=16400
+
+## 3.
+cd your-path/Buildroot-YuzukiSBC/buildroot/output/images
+mkbootimg --kernel zImage --output boot.img
+sudo cp zImage boot.img sun8i-mangopi-mq-dual-linux.dtb /media/USER/FOURTH-PARTITION/ # That fourth partition is usually something with 8 characters like 12B7-6A23 in my case
 ```
