@@ -19,6 +19,12 @@ This board features a dual-core ARM Cortex-A7 CPU, powered by the Allwinner T113
     1. [The .dtsi File](#the-dtsi-file)
     2. [The .dts File](#the-dts-file)
 4. [Rebuilding](#rebuilding)
+5. [The Code](#the-code)
+    1. [Matrices](#matrices)
+    2. [Sound](#sound)
+    3. [Screen](#screen)
+    4. [Main Menu](#main-menu)
+
 
 
 ## Buildroot
@@ -380,3 +386,85 @@ cd your-path/Buildroot-YuzukiSBC/buildroot/output/images
 mkbootimg --kernel zImage --output boot.img
 sudo cp zImage boot.img sun8i-mangopi-mq-dual-linux.dtb /media/USER/FOURTH-PARTITION/ # That fourth partition is usually something with 8 characters like 12B7-6A23 in my case
 ```
+
+---
+## The Code
+Once the devices and pins are configured, and both the kernel and OS are running, we can start working with the code and building applications.
+
+Most of the development was done directly on the board’s processor via serial port commands. There is only one exception: when working with Faust (more on that later). The general workflow was:
+
+```
+# 1. Create the .cpp file
+nano your-code.cpp
+
+# 2. Compile it using the appropiate flags, most of the time the -lgpiod since with are working with gpio libraries
+g++ your-code.cpp -o your-code -lgpiod
+
+# 3. Test it
+./your-code
+```
+
+For this project, we started by controlling the shift registers to verify that both the key matrix and the LED matrix worked properly.
+
+Some test code is included in the `code/test_code` folder:
+
+- For the **LED matrix**, the file `test_leds.cpp` turns on the LEDs on the PCB sequentially, from C4 to C6.
+- For the **OLED display**, `test_oled_clear_screen.cpp` paints the screen either black or white. This was used to ensure the driver was functioning correctly and the display was receiving data.  
+
+Additionally, the file `test_oled_draw.cpp` tests drawing an image of Patrick (from *SpongeBob*). This helped us understand how image data is handled by the OLED and what to keep in mind when displaying custom graphics.
+
+A key component of the project is sound generation. We used [Faust](https://faust.grame.fr/) to generate sine waves. Starting from a `.dsp` file, we compiled it into an executable that drives the speaker. Here’s how:
+
+```
+# 1. Create the .dsp file
+nano your-note.dsp
+
+declare options "[osc:on]";
+import("stdfaust.lib");
+process = os.osc(440.00);
+```
+
+```
+# 2. Construct the .cpp file and compile it
+
+faust -a alsa-console.cpp -o your-note.cpp your-note.dsp
+g++ your-note.cpp -o your-note -lasound
+
+# You will note that the instructions on the guidebook are different, more on that later
+```
+
+```
+# 3. Test it, your speaker must vibrate 440 times per second
+
+./your-note 
+```
+Now, let’s take a closer look at the specific code used in this project.
+
+### Matrices
+Starting with the keys and LEDs, the file `code/piano/read_notes.cpp` defines the pins used according to the schematic and board pinout. In this setup, the columns are activated one by one while the rows are scanned to detect which key is being pressed. Thanks to a fast sampling rate, key presses are registered quickly, allowing smooth playability.
+
+Due to limitations with how sound is compiled and triggered, we currently detect and play only one note at a time — even though the hardware is capable of detecting multiple simultaneous key presses.
+
+In the tutor mode code — for example, `code/tutor/t_estrellita.cpp` — pin definitions are also provided. It’s important to note that both the key matrix and the LED matrix are configured with **pull-down resistors**, so ensure the logic in the code matches this configuration to avoid unexpected behavior.
+
+### Sound
+Once we know which key has been pressed, we need to generate the corresponding sound. In the official guidebook, interrupts are used for this purpose. However, since we’re working with shift registers rather than traditional GPIOs, we couldn’t use interrupts as expected.
+
+Additionally, Faust’s OSC control (used to dynamically change values like frequency) did not work correctly on our team’s development machines. Because of this, we opted to generate each note individually using Faust, from C4 to C6. Each key is mapped to a specific precompiled sound executable.
+
+This was the best working solution at the time, though it comes with some limitations:
+
+- There’s a slight delay between pressing a key and hearing the sound.
+- Only one note can be played at a time, even though the hardware can detect multiple key presses.
+
+The 25 individual notes are available in the `code/piano/notes` folder.
+
+### Screen
+After some unsuccessful attempts to use an SPI screen, we switched to a more common I2C OLED screen with an SSD1304 controller. Using GPIO bitbanging, we were able to control the screen and display images.
+
+To generate the bitmaps, we used the tool [img2cpp](https://javl.github.io/image2cpp/). However, since the driver was displaying the images incorrectly, we had to manually mirror them before embedding.
+
+You’ll find the screen-related code in `code/oled/o_menu_normal.cpp` and related files. The bitmap is the only thing that changes between files — the rest of the code remains the same.
+
+### Main Menu
+To unify all the "modules" and create a simple user interface, we developed `code/main_code.cpp`. This file handles the input from the menu switches and lets you navigate a basic menu. From there, you can choose between **Normal Piano Mode** or **Tutor Mode**, and select a song to play.
