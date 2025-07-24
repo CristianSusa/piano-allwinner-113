@@ -24,6 +24,7 @@ This board features a dual-core ARM Cortex-A7 CPU, powered by the Allwinner T113
     2. [Sound](#sound)
     3. [Screen](#screen)
     4. [Main Menu](#main-menu)
+6. [The piano](#the-piano)
 
 
 
@@ -468,3 +469,16 @@ You’ll find the screen-related code in `code/oled/o_menu_normal.cpp` and relat
 
 ### Main Menu
 To unify all the "modules" and create a simple user interface, we developed `code/main_code.cpp`. This file handles the input from the menu switches and lets you navigate a basic menu. From there, you can choose between **Normal Piano Mode** or **Tutor Mode**, and select a song to play.
+
+---
+
+## The Piano
+Some images of the process and the final result:
+
+![pcb](/embedded-systems-development/images/pcb.jpg)
+![pcb-keys](/embedded-systems-development/images/pcb-keys.jpg)
+![pcb-leds](/embedded-systems-development/images/pcb-leds.jpg)
+![pcb-screen](/embedded-systems-development/images/pcb-screen.jpg)
+![pcb-mounted](/embedded-systems-development/images/pcb-mounted.jpg)
+![mdf](/embedded-systems-development/images/mdf.jpg)
+![final-piano](/embedded-systems-development/images/final-piano.jpg)
