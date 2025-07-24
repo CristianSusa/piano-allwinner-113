@@ -1,5 +1,5 @@
 # Embedded System
-This part of the piano project follows the instructions provided by Carlos Iván Camargo Bareño, our instructor for the semester. He shared a book and a guide detailing how to set up the embedded system on our board. The text is available in the `Resources` folder for further reference.
+This part of the piano project follows the instructions provided by Carlos Iván Camargo Bareño, our instructor for the semester. He shared a book and a guide detailing how to set up the embedded system on our board. The text is available in the `resources` folder for further reference.
 
 We chose the LCPI-PC-F133-T113-D1S-V1.3 development board, available at AliExpress.
 
@@ -43,9 +43,9 @@ make -j10 # Adjust according your machine, running the nproc command on the term
 ```
 You will encounter three errors during this process. While running `make`, it will attempt to download some files that are no longer available at the specified URLs. Here's how to resolve them:
 
-1. Within the `Resources` folder you have `v1.0.1.tar.gz`. You should move this file to `buildroot/dl/uboot/`.
-2. Within the `Resources` folder you have `1.0.0.tar.gz`. You should move this file to `buildroot/dl/linux`.
-3. Within the `Resources` folder you have `mkbootimg`. You should move this file to the folder of binaries of your computer, you can use `cd /bin/` and copy the file.
+1. Within the `resources` folder you have `v1.0.1.tar.gz`. You should move this file to `buildroot/dl/uboot/`.
+2. Within the `resources` folder you have `1.0.0.tar.gz`. You should move this file to `buildroot/dl/linux`.
+3. Within the `resources` folder you have `mkbootimg`. You should move this file to the folder of binaries of your computer, you can use `cd /bin/` and copy the file.
 4. Other errors may advise you to install different packages, they are usually available with `apt-get install`.
 
 ### 2. Kernel configuration
@@ -93,11 +93,11 @@ make -j12
 ```
 
 ### 3. Toolchain 
-These tools will help us in the compilation proccess, the `TOOLCHAIN` folder is available at `Resources`.
+These tools will help us in the compilation proccess, the `TOOLCHAIN` folder is available at `resources`.
 Just make sure to add the this folder to the path with `export PATH=$HOME/TOOLCHAIN/gcc-linaro-7.2.1-2017.11-x86_64_arm-linux-gnueabi/bin:$PATH`
 
 ### 4. U-boot setup
-Within the `Resources` folder you also have the `v1.0.1.tar.gz` folder. You need to unpack that and patch the instructions with some files available at `patch_uboot`, also available in `Resources`. This way:
+Within the `resources` folder you also have the `v1.0.1.tar.gz` folder. You need to unpack that and patch the instructions with some files available at `patch_uboot`, also available in `resources`. This way:
 
 ```
 tar zxvf v1.0.1.tar.gz
@@ -144,7 +144,7 @@ At the end, you will have a file named `u-boot-sun8iw20p1.bin`. Please copy this
 Finally, we are going to create the partitions and add the necessary files to our SD card to make everything work.
 
 According to the image:
-![buildroot_table](/embedded-systems-development/Images/buildroot_table.png)
+![buildroot_table](/embedded-systems-development/images/buildroot_table.png)
 
 * `boot_package.fex` includes `u-boot-sun8iw20p1.bin` and `sun8i-mangopi-mq-dual-linux.dtb`. These are essential for the initial boot stage of the system.
 * `boot.vfat` includes `boot.img`, `zImage`, and `sun8i-mangopi-mq-dual-linux.dtb`. These files contain the kernel, device tree, and bootloader required to start the operating system.
@@ -192,7 +192,7 @@ sudo cp zImage boot.img sun8i-mangopi-mq-dual-linux.dtb /media/USER/FOURTH-PARTI
 
 ### 7. Debian
 The last step is to load an OS to the SD Card.
-Within the `Resources` folder you have `debian_bookworm`. You just need to copy the files into the fifth partition, the one we just resized.
+Within the `resources` folder you have `debian_bookworm`. You just need to copy the files into the fifth partition, the one we just resized.
 ```
 cd your-path/debian_bookworm
 sudo cp -avr * /media/USER/FIFTH-PARTITION/  # That fifth partition is usually something with a lot of characters like d4ab1e98-2104-4b8f-8526-55a987f8b082 in my case
@@ -233,19 +233,19 @@ The screen, initially proposed to be SPI, was changed to I2C with bit-banging, a
 Those are the pins used for this project. Below, you will find some images for further reference.
 
 ### Keys Matrix
-![keys_matrix](/embedded-systems-development/Images/keys_matrix.png)
-![keys_shifts](/embedded-systems-development/Images/keys_shifts.png)
+![keys_matrix](/embedded-systems-development/images/keys_matrix.png)
+![keys_shifts](/embedded-systems-development/images/keys_shifts.png)
 
 ### LEDs Matrix
-![leds_matrix](/embedded-systems-development/Images/leds_matrix.png)
-![leds_shifts](/embedded-systems-development/Images/leds_shifts.png)
+![leds_matrix](/embedded-systems-development/images/leds_matrix.png)
+![leds_shifts](/embedded-systems-development/images/leds_shifts.png)
 
 ### Screen and Buttons
-![screen_menu](/embedded-systems-development/Images/screen_menu.png)
-![buttons_menu](/embedded-systems-development/Images/buttons_menu.png)
+![screen_menu](/embedded-systems-development/images/screen_menu.png)
+![buttons_menu](/embedded-systems-development/images/buttons_menu.png)
 
 ### Dev Board Pinout
-![dev_board_pinout](/embedded-systems-development/Images/dev_board_pinout.png)
+![dev_board_pinout](/embedded-systems-development/images/dev_board_pinout.png)
 
 ## Device Tree
 This is how we set up the pins to interact with our kernel and the OS. Here, we define what each pin is used for and which drivers they should include. This is essential when customizing an image to ensure the pins are used correctly.
