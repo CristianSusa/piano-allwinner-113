@@ -231,6 +231,8 @@ Below are some images of the PCB layout and the assembled board:
 <img src="/electronic-system-design/resources/pcb/images/bot_pcb_1.png" alt="bot_pcb_1" width="600"/>
 <img src="/electronic-system-design/resources/pcb/images/bot_pcb_2.png" alt="bot_pcb_2" width="600"/>
 
+<img src="/electronic-system-design/resources/pcb/images/final_pcb_kicad.png" alt="final_pcb_kicad" width="600"/>
+
 Final soldered board:
 
 <img src="/electronic-system-design/resources/pcb/images/final_pcb.png" alt="final_pcb" width="600"/>
@@ -277,12 +279,41 @@ Some photos of the interface in action:
 <img src="/electronic-system-design/resources/screen/images/oled_1.png" alt="oled_1" width="300"/>
 <img src="/electronic-system-design/resources/screen/images/oled_2.png" alt="oled_2" width="300"/>
 
-
 ## Prototype
+The final piano is a mix of effort, enthusiasms, challenges, copper, mdf, acrilic, electrons and music. Here are some photos.
 
+<img src="/electronic-system-design/resources/prototype/pro_1.png" alt="pro_1" width="600"/>
+<img src="/electronic-system-design/resources/prototype/pro_2.png" alt="pro_2" width="600"/>
+<img src="/electronic-system-design/resources/prototype/pro_3.png" alt="pro_3" width="600"/>
+<img src="/electronic-system-design/resources/prototype/pro_4.png" alt="pro_4" width="600"/>
 
-# Benchmarking / Target specifications
+## Technical Decisions Justification
 
-# prices of the project
+### Choice of Main Microcontroller or IC
+The project uses the **LCPI-PC-T113** development board based on the **Allwinner T113-S3** processor. This chip was selected because it can run a full embedded Debian OS, providing enough processing power to handle multiple peripherals (display, inputs, outputs, audio) while offering flexibility for expansion. Its ability to support real-time applications (like those built with Faust) made it an ideal platform for this kind of project.
 
-# improvements
+### Technology Type: THT, SMD, or Mixed
+A **mixed technology approach** was used. Most components (resistors, diodes, capacitors, shift registers, buttons, LEDs) are **THT (Through-Hole Technology)**, selected for ease of manual soldering and local availability. However, some components such as the **USB-C connector** and the **SS14 diode** are **SMD (Surface-Mount Device)** because they were only available in that format.
+
+This hybrid approach balanced manufacturability, cost, and the team's ability to assemble the board by hand.
+
+### Number of Layers
+The PCB was designed with **two layers (top and bottom)**. This was necessary to route the large number of signals—especially in the key and LED matrices—without increasing manufacturing costs. Vias were used to interconnect the layers where needed, allowing for a more compact and efficient layout.
+
+### Power and EMI Considerations
+Power is supplied through a **USB-C female connector**, delivering 5 V at 2 A. A **Schottky SS14 diode** was added to protect the circuit from reverse current or voltage spikes. Two **5.1 kΩ pull-down resistors** ensure the port is used for power only. The overall current draw of the system is low, so thermal or EMI (electromagnetic interference) concerns were minimal. However, filtering and shielding could be added in future revisions if needed.
+
+### Standards Applied
+While no formal certification standard was strictly followed, the design referenced general best practices from the **IPC-2221** standard, including trace width, clearance, and via placement. These practices helped ensure a manufacturable PCB and reliable electrical performance during testing.
+
+---
+
+## Possible Improvements
+
+- **Redesign the pinout** to include the `TX` and `RX` serial communication lines. These were missing in the original schematic and had to be patched with jumpers on the prototype.
+- **Replace or reposition the USB-C connector** to improve physical connection stability. In its current location, small movements can interrupt power and shut down the piano.
+- **Use dedicated LED drivers**, such as the TLC5940, to enable PWM per channel, reduce sound delay, and allow multiple notes to play simultaneously (polyphony).
+- **Reintroduce the SPI screen** if software support issues are resolved, to take advantage of its higher resolution for better UI design.
+- **Optimize power consumption** by adding sleep modes or auto-shutdown after inactivity.
+- **Add EMI protection and filtering** for use in more demanding environments or for future compliance with electronic certification.
+- **Follow full IPC standards** (such as IPC-2222 for general-purpose PCBs) to improve reliability, documentation quality, and potential for scaling production.
