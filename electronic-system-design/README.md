@@ -219,27 +219,67 @@ A custom footprint was created to place female headers in a "shield-like" fashio
 ---
 
 ### Construction
-Using the `FreeRouting` tool the paths were settled. The transmission lines are 0,5mm width, since there is not that much current in any of the lines thats perfect for the design. We use the top and bottom layer, and some vias are placed within the board since there are a lot of connections to make, specially with the switches and the leds.
 
-The pcb was printed using JLC PCB, the constructions files are availabe at `./resources/pcb/piano_pcb/production`
+The PCB routing was done using the `FreeRouting` tool. All traces were set to 0.5 mm width, which is sufficient given the low current requirements of each signal. Both top and bottom layers were used, with several vias placed throughout the board—particularly around the key and LED matrices—due to the high density of connections.
 
-Here are some images of the kicad and real life pcb.
+The PCB was manufactured by **JLCPCB**, and the production files are available at `./resources/pcb/piano_pcb/production`.
+
+Below are some images of the PCB layout and the assembled board:
 
 <img src="/electronic-system-design/resources/pcb/images/top_pcb_1.png" alt="top_pcb_1" width="600"/>
 <img src="/electronic-system-design/resources/pcb/images/top_pcb_2.png" alt="top_pcb_2" width="600"/>
-
 <img src="/electronic-system-design/resources/pcb/images/bot_pcb_1.png" alt="bot_pcb_1" width="600"/>
 <img src="/electronic-system-design/resources/pcb/images/bot_pcb_2.png" alt="bot_pcb_2" width="600"/>
 
-The final pcb after soldering goes like this
+Final soldered board:
 
 <img src="/electronic-system-design/resources/pcb/images/final_pcb.png" alt="final_pcb" width="600"/>
 
-# the box / .ai .pdf and photos
+## Case Design
 
-# the screen / .ai and irl and design photos
+The case was designed using **Adobe Illustrator**, vectorizing the pieces for laser cutting. The main PCB measures **314 mm × 150.5 mm**, and additional clearance was considered for the height of the devboard underneath (~15 mm), as well as the switches and screen above (~17.5 mm).
 
-# the prototipe / photos
+The design consists of two main parts:
+
+1. **The Case** – Made of MDF and laser cut to encase the piano. It protects the electronics and gives structural support.
+
+<img src="/electronic-system-design/resources/case/images/mdf.png" alt="mdf" width="500"/>
+
+2. **The Keycaps** – A piece of laser-cut acrylic simulates the shape of piano keys. The transparency allows LED light to shine through during tutor mode, guiding the user visually.
+
+<img src="/electronic-system-design/resources/case/images/acr.png" alt="acr" width="500"/>
+
+The Adobe Illustrator and PDF files used in the process are available at `./resources/case/files`.
+
+### Case Construction
+
+Once all pieces were laser cut, assembly was done manually. The result is a lightweight, solid enclosure with custom-fit keycaps:
+
+<img src="/electronic-system-design/resources/case/images/case_1.png" alt="case_1" width="500"/>
+<img src="/electronic-system-design/resources/case/images/case_2.png" alt="case_2" width="400"/>
+<img src="/electronic-system-design/resources/case/images/case_3.png" alt="case_3" width="300"/>
+
+## User Menu
+
+As mentioned earlier, three buttons (`Left`, `Enter`, and `Right`) are used to navigate the user interface. All buttons follow a pull-down configuration: pressing a button sends logic `1`, and releasing it returns to logic `0`.
+
+Upon powering on the device and loading the main application, the user is presented with the main menu featuring two options:
+
+1. **Piano Mode** – A classic mode where each key press immediately plays a corresponding note.
+2. **Tutor Mode** – A guided mode where the user can select one of four built-in songs: `Estrellita`, `Cumpleaños Feliz`, `Los Pollitos`, and `Piratas del Caribe`.
+
+Below is a simplified flow diagram of the navigation logic:
+
+<img src="/electronic-system-design/resources/screen/images/flow_diagram.png" alt="flow_diagram" width="500"/>
+
+Some photos of the interface in action:
+
+<img src="/electronic-system-design/resources/screen/images/oled_1.png" alt="oled_1" width="300"/>
+<img src="/electronic-system-design/resources/screen/images/oled_2.png" alt="oled_2" width="300"/>
+
+
+## Prototype
+
 
 # Benchmarking / Target specifications
 
