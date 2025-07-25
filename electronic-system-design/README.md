@@ -90,6 +90,8 @@ A 5×5 matrix is used to detect key presses, allowing us to read 25 distinct not
 ### LEDs Matrix
 Another 5×5 matrix is used to control the LEDs, which are mainly used in tutor mode to highlight the next key to press. Two *74HC595* shift registers manage the LED activation. LEDs use a pull-down configuration: a LED lights up when its cathode is at logic `1` and its anode is at logic `0`.
 
+Coupling capacitors were used in the four integrated circuits to ensure proper power connection.
+
 - ✅ *Pro*: Clean and organized visual feedback system.
 - ❌ *Con*: Without current control, simultaneous activation of many LEDs can overload the system.
 
@@ -142,10 +144,96 @@ The schematic shows the necessary connections for:
 
 The serial communication was originally assigned to pins `PE2` and `PE3`, as shown in the pinout image above. However, these connections were not included in the schematic — a design oversight. As a workaround, jumpers were added in the physical prototype. This is one of the areas identified for improvement in future revisions.
 
+## Materials
+The piano consists of low-cost electronic components, including standard switches, LEDs, and diodes. The two most expensive parts of the build are the LCPI-PC-T113 development board and the custom-designed daughterboard (PCB). These will be detailed further in the cost breakdown.
 
-# materials
+Below is a list of the main components used:
 
-# pcb design / .kicad, jlcpcb, photos and construction/soldering
+- 25 × Tactile switches (1 per key)
+- 25 × Red LEDs (1 per key for tutor feedback)
+- 25 × 220 Ω resistors (for LED current limiting)
+- 50 × 1N4148 diodes (for matrix input protection)
+- 8 × 10 kΩ resistors (for pull-down configurations)
+- 3 × 4-leg tactile menu switches (Left, Enter, Right)
+- 4 × 8×2 pin sockets (for shift register and board connections)
+- 3 × 74HC595 shift registers (2 for LED matrix, 1 for key matrix column activation)
+- 1 × 74HC165 shift register (for key matrix row reading)
+- 4 × 100 nF ceramic capacitors (for decoupling)
+- 1 × SS14 Schottky diode (for reverse polarity protection)
+- 2 × 5.1 kΩ resistors (for USB-C power configuration)
+- 1 × USB-C female port (for 5V power input)
+- 2 × Female header grids (to interface with dev board)
+
+All components were selected for availability, cost-efficiency, and compatibility with hand soldering and prototyping.
+
+## PCB Design
+
+KiCad and LayoutEditor were the main tools used to design the PCB. The complete KiCad project is available at `./resources/pcb/piano_pcb`.
+
+Returning to our five main modules, this section covers the design process for each one.
+
+---
+
+### Piano Inputs
+
+The key matrix relies on mechanical keyboard switches and diodes. [This video](https://www.youtube.com/watch?v=8WXpGTIbxlQ) provided valuable guidance on mechanical keyboard design and was used as a reference. Its symbol and footprint library was also integrated and is available in `./resources/pcb/piano_pcb/Resources`.
+
+Each note has a dedicated LED, so the layout prioritizes compactness while replicating a traditional piano key arrangement. Diodes are placed to the left of each key to prevent ghosting, and LEDs are positioned above or below the switch based on the note's vertical position.
+
+<img src="/electronic-system-design/resources/pcb/images/kicad_1.png" alt="kicad_1" width="400"/>
+<img src="/electronic-system-design/resources/pcb/images/kicad_2.png" alt="kicad_2" width="400"/>
+
+Footprint used for the key switches:
+
+<img src="/electronic-system-design/resources/pcb/images/sw_footprint.png" alt="sw_footprint" width="300"/>
+
+### Piano Outputs
+
+The LEDs are a core feature for the tutor mode. Each LED has a dedicated 220 Ω current-limiting resistor and a 1N4148 diode to avoid unwanted activation due to matrix effects (ghosting).
+
+<img src="/electronic-system-design/resources/pcb/images/led_1.png" alt="led_1" width="300"/>
+<img src="/electronic-system-design/resources/pcb/images/led_2.png" alt="led_2" width="300"/>
+<img src="/electronic-system-design/resources/pcb/images/led_3.jpg" alt="led_3" width="300"/>
+
+### User Interface
+
+The menu buttons and display are located on the top edge of the piano for visibility and accessibility. The OLED screen symbol and footprint were manually created based on an initial SPI version, though later adapted to a 128×64 I2C display (SSD1306). The chosen I2C pins remained the same for mechanical compatibility.
+
+<img src="/electronic-system-design/resources/pcb/images/menu_1.png" alt="menu_1" width="400"/>
+<img src="/electronic-system-design/resources/pcb/images/menu_2.png" alt="menu_2" width="400"/>
+
+### Power Input
+
+This section presented the most soldering challenges due to two surface-mount components: the USB-C female connector and the SS14 Schottky diode. These were the only compatible models available in the local market and required careful placement.
+
+<img src="/electronic-system-design/resources/pcb/images/power_1.png" alt="power_1" width="300"/>
+<img src="/electronic-system-design/resources/pcb/images/power_2.png" alt="power_2" width="300"/>
+<img src="/electronic-system-design/resources/pcb/images/power_3.png" alt="power_3" width="300"/>
+
+### Devboard Interface
+
+A custom footprint was created to place female headers in a "shield-like" fashion, aligning with the LCPI-PC-T113 board’s pinout. This allows reliable and modular interfacing between the devboard and the daughterboard.
+
+<img src="/electronic-system-design/resources/pcb/images/dev_1.png" alt="dev_1" width="400"/>
+
+---
+
+### Construction
+Using the `FreeRouting` tool the paths were settled. The transmission lines are 0,5mm width, since there is not that much current in any of the lines thats perfect for the design. We use the top and bottom layer, and some vias are placed within the board since there are a lot of connections to make, specially with the switches and the leds.
+
+The pcb was printed using JLC PCB, the constructions files are availabe at `./resources/pcb/piano_pcb/production`
+
+Here are some images of the kicad and real life pcb.
+
+<img src="/electronic-system-design/resources/pcb/images/top_pcb_1.png" alt="top_pcb_1" width="600"/>
+<img src="/electronic-system-design/resources/pcb/images/top_pcb_2.png" alt="top_pcb_2" width="600"/>
+
+<img src="/electronic-system-design/resources/pcb/images/bot_pcb_1.png" alt="bot_pcb_1" width="600"/>
+<img src="/electronic-system-design/resources/pcb/images/bot_pcb_2.png" alt="bot_pcb_2" width="600"/>
+
+The final pcb after soldering goes like this
+
+<img src="/electronic-system-design/resources/pcb/images/final_pcb.png" alt="final_pcb" width="600"/>
 
 # the box / .ai .pdf and photos
 
